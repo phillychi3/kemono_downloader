@@ -4,7 +4,7 @@ import zipfile
 import fake_useragent
 from progress.bar import IncrementalBar
 import os
-
+import argparse
 def download_all(url):
     ua = fake_useragent.UserAgent()
     useragent = ua.random
@@ -88,7 +88,10 @@ if __name__ == '__main__':
         exit()
     if os.path.isdir("downloads") == False:
         os.mkdir("downloads")
-    #download_all(input_url)
-    download_one(input_url)
+    if 'post' in input_url:
+        download_one(input_url)
+
+    else:
+        download_all(input_url)
 
     
