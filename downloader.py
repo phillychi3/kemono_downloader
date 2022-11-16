@@ -27,6 +27,8 @@ def download_all(url,folder,iszip):
         case=i.find("a").get("href")
         title=i.find("header").get_text()
         title = title.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "")
+        title = title.strip()
+    
         if os.path.exists(f'{path}/{title}.zip') or os.path.exists(f'{path}/{title}'):
             print(f'{title} exists')
             continue
@@ -38,15 +40,32 @@ def download_all(url,folder,iszip):
             print("No downloads found")
             continue
         with IncrementalBar('Downloading', max=len(downloads)+len(images)) as bar:
-            with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
+            if iszip:
+                with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
+                    for i in downloads:
+                        data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
+                        zf.writestr(i.get('href').split('/')[-1], data.content)
+                        bar.next()
+                    ct=1
+                    for i in images:
+                        data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
+                        zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                        ct+=1
+                        bar.next()
+            else:
+                if not os.path.exists(f'{path}/{title}'):
+                    os.mkdir(f'{path}/{title}')
                 for i in downloads:
                     data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
-                    zf.writestr(i.get('href').split('/')[-1], data.content)
+                    
+                    with open(f'{path}/{title}/{i.get("href").split("/")[-1]}', 'wb') as f:
+                        f.write(data.content)
                     bar.next()
                 ct=1
                 for i in images:
                     data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
-                    zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                    with open(f'{path}/{title}/{ct}{i.find("img").get("src").split("/")[-1][-4:]}', 'wb') as f:
+                        f.write(data.content)
                     ct+=1
                     bar.next()
     print("Done")
@@ -63,6 +82,7 @@ def download_one(url,folder,iszip):
     images = soup2.find_all('div', class_='post__thumbnail')
     title=soup2.find('h1',class_="post__title").find('span').get_text()
     title = title.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "")
+    title = title.strip()
     name=soup2.find('a',class_="post__user-name").get_text()
     name = name.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "").replace(' ', "")
     if folder == False:
@@ -78,15 +98,31 @@ def download_one(url,folder,iszip):
         print("No downloads found")
         return
     with IncrementalBar('Downloading', max=len(downloads)+len(images)) as bar:
-        with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
+        if iszip:
+            with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
+                for i in downloads:
+                    data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
+                    zf.writestr(i.get('href').split('/')[-1], data.content)
+                    bar.next()
+                ct=1
+                for i in images:
+                    data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
+                    zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                    ct+=1
+                    bar.next()
+        else:
+            if not os.path.exists(f'{path}/{title}'):
+                    os.mkdir(f'{path}/{title}')
             for i in downloads:
                 data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
-                zf.writestr(i.get('href').split('/')[-1], data.content)
+                with open(f'{path}/{title}/{i.get("href").split("/")[-1]}', 'wb') as f:
+                    f.write(data.content)
                 bar.next()
             ct=1
             for i in images:
                 data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
-                zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                with open(f'{path}/{title}/{ct}{i.find("img").get("src").split("/")[-1][-4:]}', 'wb') as f:
+                    f.write(data.content)
                 ct+=1
                 bar.next()
 
@@ -94,8 +130,14 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('url', help='url')
     parser.add_argument('-z', '--zip', help='use zip', action='store_true')
-    parser.add_argument('-f', '--folder', help='save folder', default='downloads')
+    parser.add_argument('-f', '--folder', help='save folder', default=False)
     args = parser.parse_args()
+    if args.folder == False:
+        if not os.path.exists('downloads'):
+            os.mkdir('downloads')
+    if args.url is None:
+        print("Please enter url")
+        exit()
     if 'post' in args.url:
         download_one(args.url, args.folder, args.zip)
     else:
