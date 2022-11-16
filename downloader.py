@@ -5,7 +5,7 @@ import fake_useragent
 from progress.bar import IncrementalBar
 import os
 from argparse import ArgumentParser
-def download_all(url):
+def download_all(url,folder,iszip):
     ua = fake_useragent.UserAgent()
     useragent = ua.random
     headers = {
@@ -16,13 +16,17 @@ def download_all(url):
     lsitdata = soup.find_all('article', class_='post-card post-card--preview')
     name=soup.find("a", class_="user-header__profile").find('span',{'itemprop':'name'}).get_text()
     name = name.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "").replace(' ', "")
-    if not os.path.exists(f'downloads/{name}'):
-        os.mkdir(f'downloads/{name}')
+    if folder == False:
+        if not os.path.exists(f'downloads/{name}'):
+            os.mkdir(f'downloads/{name}')
+        path = f'downloads/{name}'
+    else:
+        path = folder
     for i in lsitdata:
         case=i.find("a").get("href")
         title=i.find("header").get_text()
         title = title.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "")
-        if os.path.exists(f'downloads/{name}/{title}.zip'):
+        if os.path.exists(f'{path}/{title}.zip') or os.path.exists(f'{path}/{title}'):
             print(f'{title} exists')
             continue
         casedata = requests.get("https://kemono.party"+case, headers=headers)
@@ -33,7 +37,7 @@ def download_all(url):
             print("No downloads found")
             continue
         with IncrementalBar('Downloading', max=len(downloads)+len(images)) as bar:
-            with zipfile.ZipFile(f'downloads/{name}/{title}.zip', mode='w') as zf:
+            with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
                 for i in downloads:
                     data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
                     zf.writestr(i.get('href').split('/')[-1], data.content)
@@ -46,7 +50,7 @@ def download_all(url):
                     bar.next()
     print("Done")
 
-def download_one(url):
+def download_one(url,folder,iszip):
     ua = fake_useragent.UserAgent()
     useragent = ua.random
     headers = {
@@ -60,16 +64,20 @@ def download_one(url):
     title = title.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "")
     name=soup2.find('a',class_="post__user-name").get_text()
     name = name.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "").replace(' ', "")
-    if not os.path.exists(f'downloads/{name}'):
-        os.mkdir(f'downloads/{name}')
-    if os.path.exists(f'downloads/{name}/{title}.zip'):
+    if folder == False:
+        if not os.path.exists(f'downloads/{name}'):
+            os.mkdir(f'downloads/{name}')
+        path = f'downloads/{name}'
+    else:
+        path = folder
+    if os.path.exists(f'{path}/{title}.zip') or os.path.exists(f'{path}/{title}'):
         print(f'{title} exists')
         return
     if downloads == [] and images == []: # 之後要加上內容 (markdown)
         print("No downloads found")
         return
     with IncrementalBar('Downloading', max=len(downloads)+len(images)) as bar:
-        with zipfile.ZipFile(f'downloads/{name}/{title}.zip', mode='w') as zf:
+        with zipfile.ZipFile(f'{path}/{title}.zip', mode='w') as zf:
             for i in downloads:
                 data = requests.get("https://kemono.party/"+i.get('href'), headers=headers)
                 zf.writestr(i.get('href').split('/')[-1], data.content)
@@ -88,9 +96,9 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--folder', help='save folder', default='downloads')
     args = parser.parse_args()
     if 'post' in args.url:
-        download_one(args.url)
+        download_one(args.url, args.folder, args.zip)
     else:
-        download_all(args.url)
+        download_all(args.url, args.folder, args.zip)
 
 
 
