@@ -90,25 +90,16 @@ def download_one(url,folder,iszip):
                 bar.next()
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('url', help='url')
-    parser.add_argument('-z', '--zip', help='use zip', action='store_true')
-    parser.add_argument('-f', '--folder', help='save folder', default='downloads')
-    args = parser.parse_args()
-    if 'post' in args.url:
-        download_one(args.url, args.folder, args.zip)
+    input_url = input("Enter the URL: ")
+    if "kemono.party" not in input_url:
+        print("Invalid URL")
+        exit()
+    if os.path.isdir("downloads") == False:
+        os.mkdir("downloads")
+    #download_all(input_url)
+    download_one(input_url)
+
     else:
-        download_all(args.url, args.folder, args.zip)
-
-
-
-    # input_url = input("Enter the URL: ")
-    # if "kemono.party" not in input_url:
-    #     print("Invalid URL")
-    #     exit()
-    # if os.path.isdir("downloads") == False:
-    #     os.mkdir("downloads")
-    # download_all(input_url)
-    #download_one(input_url)
+        download_all(input_url)
 
     
