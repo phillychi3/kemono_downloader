@@ -4,7 +4,7 @@ import zipfile
 import fake_useragent
 from progress.bar import IncrementalBar
 import os
-
+from argparse import ArgumentParser
 def download_all(url):
     ua = fake_useragent.UserAgent()
     useragent = ua.random
@@ -13,14 +13,14 @@ def download_all(url):
     }
     r = requests.get(url, headers=headers)
     soup = BeautifulSoup(r.text, 'html.parser')
-    lsitdata = soup.find_all('h2', class_='post-card__heading')
+    lsitdata = soup.find_all('article', class_='post-card post-card--preview')
     name=soup.find("a", class_="user-header__profile").find('span',{'itemprop':'name'}).get_text()
     name = name.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "").replace(' ', "")
     if not os.path.exists(f'downloads/{name}'):
         os.mkdir(f'downloads/{name}')
     for i in lsitdata:
         case=i.find("a").get("href")
-        title=i.find("a").get_text()
+        title=i.find("header").get_text()
         title = title.replace("\n", "").replace(r"\u300004a","").replace("\u3000", "").replace('"', "")
         if os.path.exists(f'downloads/{name}/{title}.zip'):
             print(f'{title} exists')
@@ -82,13 +82,25 @@ def download_one(url):
                 bar.next()
 
 if __name__ == '__main__':
-    input_url = input("Enter the URL: ")
-    if "kemono.party" not in input_url:
-        print("Invalid URL")
-        exit()
-    if os.path.isdir("downloads") == False:
-        os.mkdir("downloads")
-    #download_all(input_url)
-    download_one(input_url)
+    parser = ArgumentParser()
+    parser.add_argument('url', help='url')
+    parser.add_argument('-z', '--zip', help='use zip', action='store_true')
+    parser.add_argument('-f', '--folder', help='save folder', default='downloads')
+    args = parser.parse_args()
+    if 'post' in args.url:
+        download_one(args.url)
+    else:
+        download_all(args.url)
+
+
+
+    # input_url = input("Enter the URL: ")
+    # if "kemono.party" not in input_url:
+    #     print("Invalid URL")
+    #     exit()
+    # if os.path.isdir("downloads") == False:
+    #     os.mkdir("downloads")
+    # download_all(input_url)
+    #download_one(input_url)
 
     
