@@ -48,8 +48,8 @@ def download_all(url,folder,iszip):
                         bar.next()
                     ct=1
                     for i in images:
-                        data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
-                        zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                        data = requests.get("https://kemono.party/"+i.find('a').get('href'), headers=headers)
+                        zf.writestr(str(ct)+i.find('a').get('href').split('/')[-1][-4:], data.content)
                         ct+=1
                         bar.next()
             else:
@@ -63,7 +63,7 @@ def download_all(url,folder,iszip):
                     bar.next()
                 ct=1
                 for i in images:
-                    data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
+                    data = requests.get("https://kemono.party/"+i.find('a').get('href'), headers=headers)
                     with open(f'{path}/{title}/{ct}{i.find("img").get("src").split("/")[-1][-4:]}', 'wb') as f:
                         f.write(data.content)
                     ct+=1
@@ -106,8 +106,8 @@ def download_one(url,folder,iszip):
                     bar.next()
                 ct=1
                 for i in images:
-                    data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
-                    zf.writestr(str(ct)+i.find('img').get('src').split('/')[-1][-4:], data.content)
+                    data = requests.get("https://kemono.party/"+i.find('a').get('href'), headers=headers)
+                    zf.writestr(str(ct)+i.find('a').get('href').split('/')[-1][-4:], data.content)
                     ct+=1
                     bar.next()
         else:
@@ -120,8 +120,8 @@ def download_one(url,folder,iszip):
                 bar.next()
             ct=1
             for i in images:
-                data = requests.get("https://kemono.party/"+i.find('img').get('src'), headers=headers)
-                with open(f'{path}/{title}/{ct}{i.find("img").get("src").split("/")[-1][-4:]}', 'wb') as f:
+                data = requests.get("https://kemono.party/"+i.find('a').get('href'), headers=headers)
+                with open(f'{path}/{title}/{ct}{i.find("a").get("href").split("/")[-1][-4:]}', 'wb') as f:
                     f.write(data.content)
                 ct+=1
                 bar.next()
