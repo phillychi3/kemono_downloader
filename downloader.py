@@ -11,8 +11,8 @@ class KemonoDownloader:
     def __init__(self):
         self.ua = fake_useragent.UserAgent()
         self.headers = {"user-agent": self.ua.random}
-        self.base_url = "https://kemono.su"
-        self.api_base = "https://kemono.su/api/v1"
+        self.base_url = "https://kemono.cr"
+        self.api_base = "https://kemono.cr/api/v1"
         self.delay = 1
 
     def parse_user_url(self, url):
